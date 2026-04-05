@@ -1,0 +1,63 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "52d2a744b61a8f5766da2dfdfaf2815c",
+    "packages": [
+        {
+            "name": "roshan-dhungana/route-commands",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dhunganaroshan341/Route-Commands-Composer.git",
+                "reference": "d6d65a84f7214c0970de2235cf8e789fcc8c158e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dhunganaroshan341/Route-Commands-Composer/zipball/d6d65a84f7214c0970de2235cf8e789fcc8c158e",
+                "reference": "d6d65a84f7214c0970de2235cf8e789fcc8c158e",
+                "shasum": ""
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "RoshanDhungana\\RouteCommands\\RouteCommandsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "RoshanDhungana\\RouteCommands\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Roshan Dhungana",
+                    "email": "dhunganaroshan341@gmail.com"
+                }
+            ],
+            "description": "A Laravel package for scaffolding modules and executing structured development commands",
+            "support": {
+                "issues": "https://github.com/dhunganaroshan341/Route-Commands-Composer/issues",
+                "source": "https://github.com/dhunganaroshan341/Route-Commands-Composer/tree/v1.0.0"
+            },
+            "time": "2026-03-29T09:16:40+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

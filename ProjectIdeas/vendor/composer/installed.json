@@ -1,0 +1,53 @@
+{
+    "packages": [
+        {
+            "name": "roshan-dhungana/route-commands",
+            "version": "v1.0.0",
+            "version_normalized": "1.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dhunganaroshan341/Route-Commands-Composer.git",
+                "reference": "d6d65a84f7214c0970de2235cf8e789fcc8c158e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dhunganaroshan341/Route-Commands-Composer/zipball/d6d65a84f7214c0970de2235cf8e789fcc8c158e",
+                "reference": "d6d65a84f7214c0970de2235cf8e789fcc8c158e",
+                "shasum": ""
+            },
+            "time": "2026-03-29T09:16:40+00:00",
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "RoshanDhungana\\RouteCommands\\RouteCommandsServiceProvider"
+                    ]
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "RoshanDhungana\\RouteCommands\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Roshan Dhungana",
+                    "email": "dhunganaroshan341@gmail.com"
+                }
+            ],
+            "description": "A Laravel package for scaffolding modules and executing structured development commands",
+            "support": {
+                "issues": "https://github.com/dhunganaroshan341/Route-Commands-Composer/issues",
+                "source": "https://github.com/dhunganaroshan341/Route-Commands-Composer/tree/v1.0.0"
+            },
+            "install-path": "../roshan-dhungana/route-commands"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}
