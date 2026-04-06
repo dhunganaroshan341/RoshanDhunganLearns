@@ -1,0 +1,285 @@
+
+Simply put:
+
+    Validate your form against your actual backend rules in real time, without submitting the form.
+
+Before Precognition you had two choices:
+
+    Duplicate validation rules in frontend (pain to maintain)
+    Submit form and wait for 422 error (bad UX)
+
+Precognition solves both. Your frontend talks to your backend validation in real time as the user types.
+How It Works Under The Hood
+
+User types in field
+→ Precognition sends lightweight request to your endpoint
+→ Laravel runs ONLY validation (skips actual handler logic)
+→ Returns validation result instantly
+→ Frontend shows error or success immediately
+→ No form submission happened yet
+
+The key is that special header:
+
+Precognition: true
+
+When Laravel sees this header it runs validation and stops. Never touches your handle() logic.
+Setup
+Install Frontend Package
+
+For Vue:
+bash
+
+npm install laravel-precognition-vue
+
+For React:
+bash
+
+npm install laravel-precognition-react
+
+For vanilla JS:
+bash
+
+npm install laravel-precognition
+
+Backend Setup
+
+Just add the middleware to your route:
+php
+
+// routes/api.php
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware(['web', HandlePrecognitiveRequests::class]);
+
+Or in your controller:
+php
+
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+
+class RegisteredUserController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware(HandlePrecognitiveRequests::class);
+    }
+}
+
+That's literally all the backend needs. Your existing validation just works.
+Real Example With Your Register Controller
+
+Your controller stays exactly as is:
+php
+
+public function store(Request $request): Response
+{
+    $request->validate([
+        'name'     => ['required', 'string', 'max:255'],
+        'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    ]);
+
+    $user = User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->string('password')),
+    ]);
+
+    event(new Registered($user));
+    Auth::login($user);
+
+    return response()->noContent();
+}
+
+Nothing changes. Precognition just intercepts before User::create runs.
+Frontend Implementation
+Vue Example
+vue
+
+<script setup>
+import { useForm } from 'laravel-precognition-vue'
+
+const form = useForm('post', '/api/v1/register', {
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+})
+
+const submit = () => form.submit()
+</script>
+
+<template>
+  <form @submit.prevent="submit">
+
+    <!-- Name Field -->
+    <div>
+      <input
+        v-model="form.name"
+        type="text"
+        placeholder="Name"
+        @change="form.validate('name')"
+      />
+      <span v-if="form.invalid('name')">
+        {{ form.errors.name }}
+      </span>
+    </div>
+
+    <!-- Email Field -->
+    <div>
+      <input
+        v-model="form.email"
+        type="email"
+        placeholder="Email"
+        @change="form.validate('email')"
+      />
+      <span v-if="form.invalid('email')">
+        {{ form.errors.email }}
+      </span>
+    </div>
+
+    <!-- Password Field -->
+    <div>
+      <input
+        v-model="form.password"
+        type="password"
+        placeholder="Password"
+        @change="form.validate('password')"
+      />
+      <span v-if="form.invalid('password')">
+        {{ form.errors.password }}
+      </span>
+    </div>
+
+    <!-- Password Confirmation -->
+    <div>
+      <input
+        v-model="form.password_confirmation"
+        type="password"
+        placeholder="Confirm Password"
+      />
+    </div>
+
+    <button
+      type="submit"
+      :disabled="form.processing"
+    >
+      {{ form.processing ? 'Registering...' : 'Register' }}
+    </button>
+
+  </form>
+</template>
+
+What Each Thing Does
+
+form.validate('email')     → triggers real time validation for that field
+form.invalid('email')      → returns true if field has error
+form.errors.email          → the actual error message from your backend
+form.processing            → true while form is submitting
+form.submit()              → actually submits the form for real
+
+The Email Unique Check Magic
+
+This is where Precognition really shines.
+
+When user types their email and leaves the field:
+
+    Precognition fires a request to your backend
+    Your backend runs unique:users validation against real database
+    Returns "The email has already been taken" instantly
+    User sees it before even clicking submit
+
+No duplicate backend logic. No custom AJAX check. Just works.
+Useful Form Methods
+javascript
+
+// Validate single field
+form.validate('email')
+
+// Validate multiple fields
+form.validate(['email', 'name'])
+
+// Check if field is valid
+form.valid('email')      // true if passed validation
+form.invalid('email')    // true if failed validation
+
+// Check if field has been touched
+form.touched('email')    // true if user interacted with field
+
+// Reset form
+form.reset()
+
+// Reset specific fields
+form.reset('email', 'password')
+
+// Check if form is dirty (changed from initial)
+form.dirty('email')
+
+With Inertia.js (Even Cleaner)
+
+If you use Inertia the package is slightly different:
+bash
+
+npm install laravel-precognition-vue-inertia
+
+vue
+
+<script setup>
+import { useForm } from 'laravel-precognition-vue-inertia'
+
+const form = useForm('post', '/register', {
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+})
+
+const submit = () => form.submit({
+    onSuccess: () => form.reset(),
+})
+</script>
+
+Inertia version handles redirects automatically after successful submission. Perfect for your stack.
+Debouncing (Important for Performance)
+
+You don't want a request firing on every single keystroke. Add debounce:
+vue
+
+<input
+  v-model="form.email"
+  type="email"
+  @input="form.validate.debounce(500, 'email')"
+/>
+
+Now it waits 500ms after user stops typing before firing. Much better UX and less server load.
+When to Use Precognition
+
+Perfect for:
+
+    Registration forms (unique email check)
+    Complex validation rules you don't want to duplicate
+    Long forms where early feedback matters
+    Any form where backend validation is the source of truth
+
+Overkill for:
+
+    Simple contact forms
+    Search inputs
+    Single field forms
+
+Real World Flow Summary
+
+User types email "roshan@gmail.com"
+→ Leaves field (onChange fires)
+→ Precognition sends: POST /api/v1/register
+  Header: Precognition: true
+  Header: Precognition-Validate-Only: email
+  Body: { email: "roshan@gmail.com" }
+→ Laravel validates email only
+→ Returns 204 (valid) or 422 (invalid)
+→ UI shows checkmark or error instantly
+→ User fills rest of form
+→ Clicks submit
+→ form.submit() sends real request
+→ Full validation + User::create() runs
+→ Done
+
+Clean. No duplication. Great UX.
